@@ -1,0 +1,47 @@
+﻿1. Cấu Trúc Thư Mục & File .env (Chức năng 1)
+* Lệnh tạo cây thư mục:
+* PowerShell
+New-Item -Path "smartfarm-system\docs", "smartfarm-system\scripts", "smartfarm-system\data", "smartfarm-system\backup" -ItemType Directory -Force
+* 
+* Tạo file .env ẩn: Đứng trong data/, chạy lệnh tạo nội dung đẩy ra gốc và ẩn file:
+* PowerShell
+Set-Location .\smartfarm-system\data
+"DB_PASSWORD=demo_123456" | Out-File -FilePath ..\.env -Encoding utf8
+(Get-Item ..\.env).Attributes = 'Hidden'
+* 
+2. Script Lọc Log auto_report.ps1 (Chức năng 2)
+* Nội dung file trong scripts/:
+* PowerShell
+# AUDIT: Xac nhan da tham dinh script, khong chua lenh xoa nguy hiem.
+$date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+"BAO CAO SU CO SMARTFARM - $date" > ..\backup\bao-cao-su-co.txt
+"" >> ..\backup\bao-cao-su-co.txt
+
+
+$logs = Get-Content ..\data\log-he-thong.log | Select-String "CRITICAL","ERROR"
+$logs | ForEach-Object { $_.Line } >> ..\backup\bao-cao-su-co.txt
+
+
+$count = ($logs | Measure-Object).Count
+"" >> ..\backup\bao-cao-su-co.txt
+"TONG SO SU CO: $count" >> ..\backup\bao-cao-su-co.txt
+* 
+* Lệnh chạy: powershell -ExecutionPolicy Bypass -File .\auto_report.ps1
+3. Đối Soát Excel (Chức năng 3)
+* Làm sạch mã: =TRIM(ô_chứa_mã) (Cột ma_linh_kien_sach).
+* Tra cứu tên: =VLOOKUP(ô_mã_sach, 'danh-muc-linh-kien'!$A$2:$D$100, 2, FALSE) (Cột ten_thiet_bi).
+* Yêu cầu: Bật AutoFilter, không dùng dòng trống, không Merge Cell.
+4. Tài Liệu README.md & Phân Tích (Chức năng 4)
+* Cấu trúc docs/README.md: Gồm Tiêu đề (H1), Hướng dẫn chạy script (Code block), Checklist (Task list có mục đã tick), Bảng thông số phần cứng (Table).
+* Mô hình IPO (Lọc log):
+   * Input: log-he-thong.log
+   * Process: Get-Content →\rightarrow→ Select-String →\rightarrow→ Measure-Object
+   * Output: bao-cao-su-co.txt
+* Tháp DIKW:
+   * (a) Quyết định thay modem →\rightarrow→ Wisdom
+   * (b) Log dòng lỗi thô →\rightarrow→ Data
+   * (c) Thống kê tổng sự cố →\rightarrow→ Information
+   * (d) Nguyên nhân gốc rễ & đề xuất →\rightarrow→ Knowledge
+* Bài toán tải log (Bẫy phần cứng):
+   * Tốc độ: 100 Mbps=12.5 MB/s100\text{ Mbps} = 12.5\text{ MB/s}100 Mbps=12.5 MB/s
+   * Thời gian: 500 MB12.5 MB/s=40 giaˆy\frac{500\text{ MB}}{12.5\text{ MB/s}} = 40\text{ giây}12.5 MB/s500 MB​=40 giaˆy.
